@@ -3,13 +3,18 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "//": "<-- Esto es para agregar comentarios y que vscode no se enoje",
+  "//": "SUPER HACK",
+  "//": "Los hijos de puta de vite no copian los archivos .wasm a .vite/deps (donde se guardan las dependencias en modo desarrollo)",
+  "//": "asi que es necesario copiar este archivo HavokPhysics.wasm para que funcionen las fisicas",
   "scripts": {
-    "dev": "vite",
+    "dev": "mkdir -p node_modules/.vite/deps && cp node_modules/@babylonjs/havok/lib/esm/HavokPhysics.wasm node_modules/.vite/deps/ && vite",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
     "@babylonjs/core": "^7.10.0",
+    "@babylonjs/havok": "^1.3.5",
     "@babylonjs/inspector": "^7.10.0",
     "typescript": "^5.2.2",
     "vite": "^5.2.0"
