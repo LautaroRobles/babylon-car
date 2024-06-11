@@ -1,4 +1,4 @@
-import { Color3, DeviceSourceManager, DeviceType, Engine, KeyboardEventTypes, Mesh, MeshBuilder, PhysicsAggregate, PhysicsBody, PhysicsRaycastResult, PhysicsShapeType, PointerInput, Scene, StandardMaterial, TransformNode, Vector3, float } from "@babylonjs/core";
+import { Color3, Color4, DeviceSourceManager, DeviceType, Engine, KeyboardEventTypes, LinesMesh, Mesh, MeshBuilder, PhysicsAggregate, PhysicsBody, PhysicsRaycastResult, PhysicsShape, PhysicsShapeType, PointerInput, Ray, RayHelper, Scene, StandardMaterial, TransformNode, Vector3, float } from "@babylonjs/core";
 import { IPhysicsEngine } from "@babylonjs/core/Physics/IPhysicsEngine";
 
 function clamp01(value: float): float {
@@ -16,6 +16,7 @@ export default class Car {
     deviceSourceManager: DeviceSourceManager
 
     car: Mesh
+    carShape: PhysicsShape
     carBody: PhysicsBody
     tires: Mesh[]
     tiresMaterials: StandardMaterial[]
@@ -33,14 +34,14 @@ export default class Car {
     mass = 1000
 
     // Tires
-    tireRadius = 1
+    tireRadius = 1.5
     TIRE_FL = 2 // Front Left Index
     TIRE_FR = 0 // Front Right Index
     TIRE_RL = 3 // Rear Left Index
     TIRE_RR = 1 // Rear Right Index
 
     // Suspension
-    suspensionRestDistance = 0.5 // TODO: Combine with tireRadius
+    suspensionRestDistance = 0 // TODO: Combine with tireRadius
     suspensionStrength = 20000
     suspensionDamp = 1000
 
@@ -58,6 +59,9 @@ export default class Car {
     engineTorque = 5000
     brakingStrength = 500
 
+    // DEBUG
+    lines: LinesMesh[]
+
     constructor(scene: Scene, engine: Engine, position: Vector3) {
         this.engine = engine
         this.scene = scene
@@ -67,11 +71,15 @@ export default class Car {
         // Modelo y fisicas del auto
         this.car = MeshBuilder.CreateBox("car", { width: this.width, height: this.height, size: this.size })
         this.car.position = position
-        this.carBody = new PhysicsAggregate(this.car, PhysicsShapeType.BOX, { mass: this.mass, restitution: 0}, scene).body;
+        let physicsAggregate = new PhysicsAggregate(this.car, PhysicsShapeType.BOX, { mass: this.mass, restitution: 0}, scene);
+        this.carBody = physicsAggregate.body
+        this.carShape = physicsAggregate.shape
+        this.carShape.filterMembershipMask = 1
 
         // Crear ruedas
         this.tires = []
         this.tiresMaterials = []
+        this.lines = []
         for (let i = 0; i < 4; i++) {
 
             // ???
@@ -80,10 +88,19 @@ export default class Car {
 
             this.tiresMaterials[i] = new StandardMaterial("tireMaterial")
             this.tiresMaterials[i].diffuseColor = new Color3(0.5, 1, 1)
+            this.tiresMaterials[i].alpha = 0.5
 
-            this.tires[i] = MeshBuilder.CreateBox("tire", { width: 0.15, height: this.tireRadius * 2, size: this.tireRadius * 2 })
+            this.tires[i] = MeshBuilder.CreateBox("tire", { width: 0.15, height: this.tireRadius, size: this.tireRadius })
             this.tires[i].position = this.car.position.add(new Vector3(this.width / 2 * xSign, this.height / 2 - 1, this.size / 2 * zSign))
             this.tires[i].material = this.tiresMaterials[i]
+            
+            // DEBUG
+            this.lines[i] = MeshBuilder.CreateLines("debug", { 
+                points: [Vector3.Zero(), Vector3.Zero()], 
+                colors: [new Color4(0.1, 1, 0.1, 1), new Color4(0.1, 1, 0.1, 1)],
+                updatable: true,
+                useVertexAlpha: false
+            })
 
             this.car.addChild(this.tires[i])
         }
@@ -170,10 +187,25 @@ export default class Car {
     //                 ******|*******                     -END-
     // GROUND ----------------------------------------------------------
     // 
-    tireRay(tire: Mesh) {
-        let start = tire.getAbsolutePosition()
-        let end = tire.getAbsolutePosition().add(this.carTransform(Vector3.Down().scale(this.tireRadius)))
-        return this.physicsEngine.raycast(start, end)
+    tireRay(tire: Mesh, index: number): PhysicsRaycastResult {
+        let start = tire.getAbsolutePosition().add(this.carTransform(Vector3.Up().scale(this.tireRadius / 2)))
+        let end = tire.getAbsolutePosition().add(this.carTransform(Vector3.Down().scale(this.tireRadius / 2)))
+        let ray = this.physicsEngine.raycast(start, end, { collideWith: 2 }) // TODO: Revisar porque el piso es 2
+
+        let color = new Color4(1, 0.5, 0.5, 1)
+
+        if(ray.hasHit)
+            color = new Color4(0.5, 1, 0.5, 1)
+
+        this.lines[index] = MeshBuilder.CreateLines("debug", { 
+            points: [start, end], 
+            colors: [color, color],
+            updatable: true,
+            instance: this.lines[index],
+            useVertexAlpha: false
+        })
+
+        return ray
     }
 
     applySuspensionForce(tire: Mesh, tireRay: PhysicsRaycastResult)
@@ -188,7 +220,7 @@ export default class Car {
 		let velocity = tireUp.dot(tireVelocity)
 
 		// Calculate offset of the tire relative to the rest position of the suspension
-		let offset = tireRay.hitDistance - this.suspensionRestDistance
+		let offset = tireRay.hitDistance - (this.suspensionRestDistance + this.tireRadius)
 
 		// Calculate the force to be applied
 		let force = - (offset * this.suspensionStrength) - (velocity * this.suspensionDamp)
@@ -197,7 +229,7 @@ export default class Car {
         this.carBody.applyForce(tireUp.scale(force), tire.getAbsolutePosition())
 	}
 
-    applySteeringForce(tire: Mesh, index: Number)
+    applySteeringForce(tire: Mesh, index: number)
 	{
         // Right direction relative to the tire
 		let tireRight = this.tireTransform(tire, Vector3.Right());
@@ -229,7 +261,7 @@ export default class Car {
 		this.carBody.applyForce(tireRight.scale(desiredAcceleration).scale(gripStrength), tire.getAbsolutePosition());
 	}
 
-    applyAccelerationForce(tire: Mesh, index: Number)
+    applyAccelerationForce(tire: Mesh, index: number)
 	{
         // Forward direction relative to the tire
 		let tireForward = this.tireTransform(tire, Vector3.Forward());
@@ -277,6 +309,9 @@ export default class Car {
         if(mouse?.getInput(PointerInput.RightClick)) {
             this.carBody.applyForce(this.carTransform(Vector3.Right()).scale(-50000), this.car.position)
         }
+        if(mouse?.getInput(PointerInput.MiddleClick)) {
+            this.carBody.applyForce(this.carTransform(Vector3.Up()).scale(50000), this.car.position)
+        }
 
         // Rotar las ruedas
         // TODO: Hacer mejor
@@ -295,14 +330,14 @@ export default class Car {
 
         // Aplicar fuerzas
         this.tires.forEach((tire, index) => {
-            let ray = this.tireRay(tire)
+            let ray = this.tireRay(tire, index)
 
             if(ray.hasHit) {
                 this.applySuspensionForce(tire, ray)
                 this.applySteeringForce(tire, index)
                 this.applyAccelerationForce(tire, index)
 
-                this.tiresMaterials[index].diffuseColor = new Color3(0.5, 1, 1)
+                this.tiresMaterials[index].diffuseColor = new Color3(0.5, 1, 0.5)
             }
             else {
                 this.tiresMaterials[index].diffuseColor = new Color3(1, 0.5, 0.5)
