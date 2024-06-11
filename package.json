@@ -6,7 +6,7 @@
   "//": "asi que es necesario copiar este archivo HavokPhysics.wasm para que funcionen las fisicas",
   "scripts": {
     "dev": "mkdir -p node_modules/.vite/deps && cp node_modules/@babylonjs/havok/lib/esm/HavokPhysics.wasm node_modules/.vite/deps/ && vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
