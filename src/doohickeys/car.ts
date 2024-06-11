@@ -1,4 +1,4 @@
-import { Color3, DeviceSourceManager, DeviceType, Engine, KeyboardEventTypes, Mesh, MeshBuilder, PhysicsAggregate, PhysicsBody, PhysicsRaycastResult, PhysicsShapeType, PointerInput, Scene, StandardMaterial, TransformNode, Vector3 } from "@babylonjs/core";
+import { Color3, DeviceSourceManager, DeviceType, Engine, Mesh, MeshBuilder, PhysicsAggregate, PhysicsBody, PhysicsRaycastResult, PhysicsShapeType, PointerInput, Scene, StandardMaterial, TransformNode, Vector3 } from "@babylonjs/core";
 import { IPhysicsEngine } from "@babylonjs/core/Physics/IPhysicsEngine";
 
 export default class Car {
@@ -11,7 +11,7 @@ export default class Car {
     carBody: PhysicsBody
     tires: Mesh[]
 
-    size = 3
+    size = 4
     width = 2
     height = 1
     mass = 1000
@@ -29,7 +29,7 @@ export default class Car {
     // 0 = no grip
     // 1 = full grip
     gripFactor = 1
-    tireMass = 150
+    tireMass = 1000
 
     constructor(scene: Scene, engine: Engine, position: Vector3) {
         this.engine = engine
@@ -53,7 +53,7 @@ export default class Car {
             let zSign = i % 2 == 0 ? 1 : -1
             let xSign = i < 2 ? 1 : -1
 
-            this.tires[i] = MeshBuilder.CreateDisc("tire", { radius: this.tireRadius, tessellation: 16, sideOrientation: 1 })
+            this.tires[i] = MeshBuilder.CreateSphere("tire", { diameter: this.tireRadius * 2 })
             this.tires[i].position = this.car.position.add(new Vector3(this.width / 2 * xSign, this.height / 2 - 1, this.size / 2 * zSign))
             this.tires[i].material = tireMaterial
 
@@ -70,9 +70,8 @@ export default class Car {
         return this.car.position.add(child.position)
     }
 
-    transformVector(vector: Vector3): Vector3 {
-        let worldMatrix = this.car.getWorldMatrix();
-        return Vector3.TransformNormal(vector, worldMatrix);
+    carTransform(vector: Vector3): Vector3 {
+        return Vector3.TransformNormal(vector, this.car.getWorldMatrix());
     }
 
     tireTransform(tire: TransformNode, vector: Vector3): Vector3 {
@@ -81,7 +80,7 @@ export default class Car {
 
     tireRay(tire: Mesh) {
         let start = tire.getAbsolutePosition()
-        let end = tire.getAbsolutePosition().add(this.transformVector(new Vector3(0, -this.tireRadius, 0)))
+        let end = tire.getAbsolutePosition().add(this.carTransform(new Vector3(0, -this.tireRadius, 0)))
         return this.physicsEngine.raycast(start, end)
     }
 
@@ -134,11 +133,11 @@ export default class Car {
 		// Get the velocity proyected on to the tire "right" direction
 		let steeringVelocity = tireRight.dot(tireVelocity);
 
-		let desiredVelocityChange = -steeringVelocity * this.gripFactor;
+		let desiredVelocityChange = -steeringVelocity;
 
 		let desiredAcceleration = desiredVelocityChange;
 
-		this.carBody.applyForce(tireRight.scale(this.tireMass).scale(desiredAcceleration), tire.getAbsolutePosition());
+		this.carBody.applyForce(tireRight.scale(200).scale(desiredAcceleration), tire.getAbsolutePosition());
 	}
 
     update() {
@@ -151,11 +150,13 @@ export default class Car {
                 this.applySuspensionForce(tire, ray)
                 this.applySteeringForce(tire)
 
+                // TODO: Aplicar control real para el auto
+                let direction = this.carTransform(Vector3.Forward())
                 if(mouse?.getInput(PointerInput.LeftClick)) {
-                    this.carBody.applyForce(new Vector3(0, 0, 1000), this.car.position)
+                    this.carBody.applyForce(direction.scale(1500), this.car.position)
                 }
                 else if(mouse?.getInput(PointerInput.RightClick)) {
-                    this.carBody.applyForce(new Vector3(0, 0, -1000), this.car.position)
+                    this.carBody.applyForce(direction.scale(-1500), this.car.position)
                 }
                 else {
                     this.applyAccelerationForce(tire)
