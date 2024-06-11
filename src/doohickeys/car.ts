@@ -181,7 +181,7 @@ export default class Car {
 		let tireUp = this.tireTransform(tire, Vector3.Up())
 
 		// Get the velocity for the tire
-		let tireVelocity = this.carBody.getLinearVelocity().add(this.carBody.getAngularVelocity().cross(tire.position))
+		let tireVelocity = this.carBody.getLinearVelocity().add(this.carBody.getAngularVelocity().cross(this.carTransform(tire.position)))
 
 		// Get the velocity proyected on to the tire direction
 		let velocity = tireUp.dot(tireVelocity)
@@ -202,7 +202,7 @@ export default class Car {
 		let tireRight = this.tireTransform(tire, Vector3.Right());
 
 		// Get the velocity for the tire
-		let tireVelocity = this.carBody.getLinearVelocity().add(this.carBody.getAngularVelocity().cross(tire.position))
+		let tireVelocity = this.carBody.getLinearVelocity().add(this.carBody.getAngularVelocity().cross(this.carTransform(tire.position)))
 
 		// Get the velocity proyected on to the tire "right" direction
 		let steeringVelocity = tireRight.dot(tireVelocity);
@@ -246,7 +246,7 @@ export default class Car {
         }
         else if(!this.forward) {
             // Get the velocity for the tire
-            let tireVelocity = this.carBody.getLinearVelocity().add(this.carBody.getAngularVelocity().cross(tire.position))
+            let tireVelocity = this.carBody.getLinearVelocity().add(this.carBody.getAngularVelocity().cross(this.carTransform(tire.position)))
 
             // Get the velocity proyected on to the tire "forward" direction
             let forwardVelocity = tireForward.dot(tireVelocity);
@@ -283,8 +283,6 @@ export default class Car {
             this.currentRotation -= Math.abs(this.currentRotation) / this.currentRotation
 
         this.currentRotation = clamp(-this.maxRotation, this.maxRotation, this.currentRotation)
-
-        console.log(this.currentRotation)
 
         this.tires[this.TIRE_FL].rotation = new Vector3(0, this.currentRotation * Math.PI / 180, 0)
         this.tires[this.TIRE_FR].rotation = new Vector3(0, this.currentRotation * Math.PI / 180, 0)
