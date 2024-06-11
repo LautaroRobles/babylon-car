@@ -34,7 +34,7 @@ export default class Car {
     mass = 1000
 
     // Tires
-    tireRadius = 1.5
+    tireRadius = 2
     TIRE_FL = 2 // Front Left Index
     TIRE_FR = 0 // Front Right Index
     TIRE_RL = 3 // Rear Left Index
@@ -91,7 +91,7 @@ export default class Car {
             this.tiresMaterials[i].alpha = 0.5
 
             this.tires[i] = MeshBuilder.CreateBox("tire", { width: 0.15, height: this.tireRadius, size: this.tireRadius })
-            this.tires[i].position = this.car.position.add(new Vector3(this.width / 2 * xSign, this.height / 2 - 1, this.size / 2 * zSign))
+            this.tires[i].position = this.car.position.add(new Vector3(this.width / 2 * xSign, this.height - this.tireRadius, this.size / 2 * zSign))
             this.tires[i].material = this.tiresMaterials[i]
             
             // DEBUG
@@ -220,7 +220,7 @@ export default class Car {
 		let velocity = tireUp.dot(tireVelocity)
 
 		// Calculate offset of the tire relative to the rest position of the suspension
-		let offset = tireRay.hitDistance - (this.suspensionRestDistance + this.tireRadius)
+		let offset = tireRay.hitDistance - (this.suspensionRestDistance + this.tireRadius * 0.5)
 
 		// Calculate the force to be applied
 		let force = - (offset * this.suspensionStrength) - (velocity * this.suspensionDamp)
