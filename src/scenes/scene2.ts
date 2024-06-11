@@ -28,7 +28,7 @@ export async function createScene (engine: Engine, _canvas: HTMLCanvasElement): 
         width: 1000, 
         height: 1000,
         minHeight: 0,
-        maxHeight: 0,
+        maxHeight: 50,
         subdivisions: 64,
         onReady: (groundMesh) => {
             new PhysicsAggregate(ground, PhysicsShapeType.MESH, { mass: 0, mesh: groundMesh }, scene);

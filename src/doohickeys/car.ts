@@ -27,8 +27,8 @@ export default class Car {
     backward = false
 
     // Car
-    size = 4
-    width = 2
+    size = 5
+    width = 3
     height = 1
     mass = 1000
 
@@ -45,17 +45,18 @@ export default class Car {
     suspensionDamp = 1000
 
     // Steering
-    gripFactorSpeed = 7 // Use different values of grip factor depending on drifting speed
-    gripFactorSlow = 0.7
-    gripFactorFast = 0.1
-    gripStrength = 1000
+    gripFactorSpeed = 5  // Lower values makes drifting easier?
+    gripFactorFast = 0.2 // When going fast
+    gripFactorSlow = 1   // When going slow
+    frontGripStrength = 3000
+    rearGripStrength = 1500
     currentRotation = 0 // degrees
-    maxRotation = 25    // degrees
+    maxRotation = 15    // degrees
 
     // Acceleration
     topSpeed = 120 / 3.6 // convierto km/h a m/s
-    tireTorque = 5000
-    brakingStrength = 200
+    engineTorque = 5000
+    brakingStrength = 500
 
     constructor(scene: Scene, engine: Engine, position: Vector3) {
         this.engine = engine
@@ -196,7 +197,7 @@ export default class Car {
         this.carBody.applyForce(tireUp.scale(force), tire.getAbsolutePosition())
 	}
 
-    applySteeringForce(tire: Mesh)
+    applySteeringForce(tire: Mesh, index: Number)
 	{
         // Right direction relative to the tire
 		let tireRight = this.tireTransform(tire, Vector3.Right());
@@ -221,8 +222,11 @@ export default class Car {
         // TODO: The desired acceleration should be multiplied by a fixed delta time
 		let desiredAcceleration = desiredVelocityChange;
 
+        // TODO: Mejorar esto
+        let gripStrength = (index == this.TIRE_FL || index == this.TIRE_FR) ? this.frontGripStrength : this.rearGripStrength
+
         // Apply steering force at tire position
-		this.carBody.applyForce(tireRight.scale(desiredAcceleration).scale(this.gripStrength), tire.getAbsolutePosition());
+		this.carBody.applyForce(tireRight.scale(desiredAcceleration).scale(gripStrength), tire.getAbsolutePosition());
 	}
 
     applyAccelerationForce(tire: Mesh, index: Number)
@@ -240,7 +244,8 @@ export default class Car {
             
             // If im slow I accelerate faster
             // If im fast I accelerate slower
-            let availableTorque = clamp01(1.25 - carNormalizedSpeed) * this.tireTorque
+            // TODO: Change this to a lookuptable
+            let availableTorque = clamp01(1.25 - carNormalizedSpeed) * this.engineTorque
 
             this.carBody.applyForce(tireForward.scale(availableTorque), tire.getAbsolutePosition());
         }
@@ -267,17 +272,18 @@ export default class Car {
         // DEBUG
         let mouse = this.deviceSourceManager.getDeviceSource(DeviceType.Mouse)
         if(mouse?.getInput(PointerInput.LeftClick)) {
-            this.carBody.applyForce(this.carTransform(Vector3.Right()).scale(5000), this.car.position)
+            this.carBody.applyForce(this.carTransform(Vector3.Right()).scale(50000), this.car.position)
         }
         if(mouse?.getInput(PointerInput.RightClick)) {
-            this.carBody.applyForce(this.carTransform(Vector3.Right()).scale(-5000), this.car.position)
+            this.carBody.applyForce(this.carTransform(Vector3.Right()).scale(-50000), this.car.position)
         }
 
         // Rotar las ruedas
+        // TODO: Hacer mejor
         if(this.left)
-            this.currentRotation -= 1
+            this.currentRotation -= 2
         else if(this.right)
-            this.currentRotation += 1
+            this.currentRotation += 2
 
         if(!this.left && !this.right && this.currentRotation != 0)
             this.currentRotation -= Math.abs(this.currentRotation) / this.currentRotation
@@ -293,7 +299,7 @@ export default class Car {
 
             if(ray.hasHit) {
                 this.applySuspensionForce(tire, ray)
-                this.applySteeringForce(tire)
+                this.applySteeringForce(tire, index)
                 this.applyAccelerationForce(tire, index)
 
                 this.tiresMaterials[index].diffuseColor = new Color3(0.5, 1, 1)
