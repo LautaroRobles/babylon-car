@@ -25,11 +25,11 @@ export async function createScene (engine: Engine, _canvas: HTMLCanvasElement): 
 
     // Crear el piso
     let ground = MeshBuilder.CreateGroundFromHeightMap("ground", "./heightmap.jpg", {
-        width: 500, 
-        height: 500,
+        width: 1000, 
+        height: 1000,
         minHeight: 0,
-        maxHeight: 15,
-        subdivisions: 256,
+        maxHeight: 0,
+        subdivisions: 64,
         onReady: (groundMesh) => {
             new PhysicsAggregate(ground, PhysicsShapeType.MESH, { mass: 0, mesh: groundMesh }, scene);
         }
