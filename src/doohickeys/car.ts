@@ -1,13 +1,6 @@
 import { Color3, Color4, DeviceSourceManager, DeviceType, Engine, KeyboardEventTypes, LinesMesh, Mesh, MeshBuilder, PhysicsAggregate, PhysicsBody, PhysicsRaycastResult, PhysicsShape, PhysicsShapeType, PointerInput, Ray, RayHelper, Scene, StandardMaterial, TransformNode, Vector3, float } from "@babylonjs/core";
 import { IPhysicsEngine } from "@babylonjs/core/Physics/IPhysicsEngine";
-
-function clamp01(value: float): float {
-    return Math.min(Math.max(value, 0), 1)
-}
-
-function clamp(min: float, max: float, value: float): float {
-    return Math.min(Math.max(value, min), max)
-}
+import { EMath } from "../utils/EMath";
 
 export default class Car {
     engine: Engine
@@ -223,11 +216,11 @@ export default class Car {
 		// Get the velocity proyected on to the tire "right" direction
 		let steeringVelocity = tireRight.dot(tireVelocity);
 
-        let normalizedSteeringVelocity = clamp01(tireVelocity.length() / this.gripFactorSpeed)
+        let normalizedSteeringVelocity = EMath.clamp01(tireVelocity.length() / this.gripFactorSpeed)
 
         // Low grip if going fast (drifting)
         // High grip if going slow
-        let gripFactor = clamp(this.gripFactorFast, this.gripFactorSlow, 1 - normalizedSteeringVelocity)
+        let gripFactor = EMath.clamp(this.gripFactorFast, this.gripFactorSlow, 1 - normalizedSteeringVelocity)
 
         // Get the velocity opposite to the current tire velocity
         // If the grip factor is less than 1 the car will drift
@@ -255,12 +248,12 @@ export default class Car {
             let carSpeed = Vector3.Dot(this.carTransform(Vector3.Forward()), this.carBody.getLinearVelocity())
 
             // Get normalized (0, 1) car speed based on its top speed
-            let carNormalizedSpeed = clamp01(Math.abs(carSpeed) / this.topSpeed)
+            let carNormalizedSpeed = EMath.clamp01(Math.abs(carSpeed) / this.topSpeed)
             
             // If im slow I accelerate faster
             // If im fast I accelerate slower
             // TODO: Change this to a lookuptable
-            let availableTorque = clamp01(1.25 - carNormalizedSpeed) * this.engineTorque
+            let availableTorque = EMath.clamp01(1.25 - carNormalizedSpeed) * this.engineTorque
 
             this.carBody.applyForce(tireForward.scale(availableTorque), tire.getAbsolutePosition());
         }
@@ -306,7 +299,7 @@ export default class Car {
         if(!this.left && !this.right && this.currentRotation != 0)
             this.currentRotation -= Math.abs(this.currentRotation) / this.currentRotation
 
-        this.currentRotation = clamp(-this.maxRotation, this.maxRotation, this.currentRotation)
+        this.currentRotation = EMath.clamp(-this.maxRotation, this.maxRotation, this.currentRotation)
 
         this.tires[this.TIRE_FL].rotation = new Vector3(0, this.currentRotation * Math.PI / 180, 0)
         this.tires[this.TIRE_FR].rotation = new Vector3(0, this.currentRotation * Math.PI / 180, 0)
