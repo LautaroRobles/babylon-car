@@ -1,5 +1,6 @@
 import { Color3, Engine, FreeCamera, HemisphericLight, MeshBuilder, Scene, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
 
+// Esta es la escena que viene de ejemplo
 export function createScene (engine: Engine, canvas: HTMLCanvasElement): Scene {
     // this is the default code from the playground:
 

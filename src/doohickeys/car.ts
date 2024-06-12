@@ -28,10 +28,10 @@ export default class Car {
     backward = false
 
     // Car
-    size = 5
-    width = 3
-    height = 1
-    mass = 1000
+    size = 4.6
+    width = 1.7
+    height = 1.4
+    mass = 1354
 
     // Tires
     tireRadius = 1.5
@@ -41,26 +41,26 @@ export default class Car {
     TIRE_RR = 1 // Rear Right Index
 
     // Raycast
-    rayStart = 0.75
+    rayStart = 0.5
     rayEnd = -1
 
     // Suspension
-    suspensionRestDistance = 1.5 // Distancia hasta rayEnd
+    suspensionRestDistance = 0.95 // Distancia hasta rayEnd
     suspensionStrength = 20000
     suspensionDamp = 1000
 
     // Steering
     gripFactorSpeed = 100 / 3.6 // Speed at wich the tires have less grip
-    gripFactorFast = 0.1        // When going fast
+    gripFactorFast = 0.7        // When going fast
     gripFactorSlow = 1          // When going slow
-    frontGripStrength = 10000
-    rearGripStrength = 8000
+    frontGripStrength = 1000
+    rearGripStrength = 1000
     currentRotation = 0 // degrees
-    maxRotation = 35    // degrees
+    maxRotation = 15    // degrees
 
     // Acceleration
-    topSpeed = 200 / 3.6 // convierto km/h a m/s
-    engineTorque = 15000
+    topSpeed = 120 / 3.6 // convierto km/h a m/s
+    engineTorque = 10000
     brakingStrength = 500
     deaccelerationStrenght = 50 // Auto braking
 
@@ -96,7 +96,7 @@ export default class Car {
             this.tiresMaterials[i].alpha = 0.5
 
             this.tires[i] = MeshBuilder.CreateBox("tire", { width: 0.15, height: this.tireRadius, size: this.tireRadius })
-            this.tires[i].position = this.car.position.add(new Vector3(this.width / 2 * xSign, -0.25, this.size / 2 * zSign))
+            this.tires[i].position = this.car.position.add(new Vector3((this.width / 2) * xSign, (0.2 -this.height / 2), (this.size / 2 - 1) * zSign))
             this.tires[i].material = this.tiresMaterials[i]
             
             // DEBUG
@@ -238,7 +238,7 @@ export default class Car {
 		let desiredAcceleration = desiredVelocityChange;
 
         // TODO: Mejorar esto
-        let gripStrength = (index == this.TIRE_FL || index == this.TIRE_FR) ? this.frontGripStrength : this.rearGripStrength
+        let gripStrength = (index == this.TIRE_RL || index == this.TIRE_RR) ? this.frontGripStrength : this.rearGripStrength
 
         // Apply steering force at tire position
 		this.carBody.applyForce(tireRight.scale(desiredAcceleration).scale(gripStrength), tire.getAbsolutePosition());

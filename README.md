@@ -1,11 +1,16 @@
-# Babylon
+# Jueguito de autos
 
-Iniciar servidor desarrollo
+## Instalar dependencias
+```
+npm install
+```
+
+## Iniciar servidor desarrollo
 ```bash
 npm run dev
 ```
 
-Buildear para produccion
+## Buildear para produccion
 ```bash
 # El argumento --base es opcional, solo se debe usar
 # si donde se hosteara el proyecto es una subcarpeta

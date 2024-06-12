@@ -3,7 +3,8 @@ import { GridMaterial } from '@babylonjs/materials';
 import HavokPhysics from "@babylonjs/havok";
 import Car from "../doohickeys/car";
 
-export async function createScene (engine: Engine, _canvas: HTMLCanvasElement): Promise<Scene> {
+// No es necesario crear las escenas de esta manera pero lo hago asi porque es lo mas facil
+export async function createScene (engine: Engine): Promise<Scene> {
 
     // This creates a basic Babylon Scene object (non-mesh)
     var scene = new Scene(engine);
@@ -17,28 +18,29 @@ export async function createScene (engine: Engine, _canvas: HTMLCanvasElement): 
     new HemisphericLight("light", new Vector3(0, 1, 0), scene);
 
     // Crear el auto
-    let car = new Car(scene, engine, new Vector3(0, 10, -180))
+    let car = new Car(scene, engine, new Vector3(0, 10, 0))
 
     // This creates and positions a free camera (non-mesh)
     var camera = new FollowCamera("camera1", new Vector3(0, 5, 10), scene, car.car);
     camera.rotationOffset = 180
 
-    // Crear el piso
-    let ground = MeshBuilder.CreateGroundFromHeightMap("ground", "./heightmap.jpg", {
+    // Crear el piso a partir de un heightmap de la carpeta /public
+    let ground = MeshBuilder.CreateGroundFromHeightMap("ground", "heightmap.jpg", {
         width: 1000, 
         height: 1000,
         minHeight: 0,
-        maxHeight: 50,
+        maxHeight: 10,
         subdivisions: 64,
         onReady: (groundMesh) => {
+            // Cuando se termina de generar la mesh creamos el PhysicsBody y PhisicsShape
             new PhysicsAggregate(ground, PhysicsShapeType.MESH, { mass: 0, mesh: groundMesh }, scene);
         }
     })
     
-    let groundMaterial = new GridMaterial("ground_material")
-    groundMaterial.opacity = 1
-    ground.material = groundMaterial
+    // Creamos un material de grid para el ground
+    ground.material = new GridMaterial("ground_material")
 
+    // Actualizamos el auto en cada fotograma
     scene.registerBeforeRender(() => {
         car.update()
     });
