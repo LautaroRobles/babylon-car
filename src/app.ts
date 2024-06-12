@@ -4,7 +4,7 @@ import { createScene } from "./scenes/scene2";
 import { Engine } from "@babylonjs/core";
 
 // Determina si en la escena se mostrara un menu de debug
-const debug = true
+const debug = !import.meta.env.PROD
 
 // Inicializamos Babylon
 console.log(`Iniciando Juego`);

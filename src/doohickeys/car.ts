@@ -34,30 +34,35 @@ export default class Car {
     mass = 1000
 
     // Tires
-    tireRadius = 2
+    tireRadius = 1.5
     TIRE_FL = 2 // Front Left Index
     TIRE_FR = 0 // Front Right Index
     TIRE_RL = 3 // Rear Left Index
     TIRE_RR = 1 // Rear Right Index
 
+    // Raycast
+    rayStart = 0.75
+    rayEnd = -1
+
     // Suspension
-    suspensionRestDistance = 0 // TODO: Combine with tireRadius
+    suspensionRestDistance = 1.5 // Distancia hasta rayEnd
     suspensionStrength = 20000
     suspensionDamp = 1000
 
     // Steering
-    gripFactorSpeed = 5  // Lower values makes drifting easier?
-    gripFactorFast = 0.2 // When going fast
-    gripFactorSlow = 1   // When going slow
-    frontGripStrength = 3000
-    rearGripStrength = 1500
+    gripFactorSpeed = 100 / 3.6 // Speed at wich the tires have less grip
+    gripFactorFast = 0.1        // When going fast
+    gripFactorSlow = 1          // When going slow
+    frontGripStrength = 10000
+    rearGripStrength = 8000
     currentRotation = 0 // degrees
-    maxRotation = 15    // degrees
+    maxRotation = 35    // degrees
 
     // Acceleration
-    topSpeed = 120 / 3.6 // convierto km/h a m/s
-    engineTorque = 5000
+    topSpeed = 200 / 3.6 // convierto km/h a m/s
+    engineTorque = 15000
     brakingStrength = 500
+    deaccelerationStrenght = 50 // Auto braking
 
     // DEBUG
     lines: LinesMesh[]
@@ -91,7 +96,7 @@ export default class Car {
             this.tiresMaterials[i].alpha = 0.5
 
             this.tires[i] = MeshBuilder.CreateBox("tire", { width: 0.15, height: this.tireRadius, size: this.tireRadius })
-            this.tires[i].position = this.car.position.add(new Vector3(this.width / 2 * xSign, this.height - this.tireRadius, this.size / 2 * zSign))
+            this.tires[i].position = this.car.position.add(new Vector3(this.width / 2 * xSign, -0.25, this.size / 2 * zSign))
             this.tires[i].material = this.tiresMaterials[i]
             
             // DEBUG
@@ -161,35 +166,13 @@ export default class Car {
         return Vector3.TransformNormal(vector, tire.getWorldMatrix())
     }
 
-    // Raycast from the tire CENTER of the tire to the GROUND
-    //                 **************
-    //             **********************
-    //          ****************************
-    //       ***********            ***********
-    //      ********                    ********
-    //    ********                        ********
-    //   *******                            *******
-    //  *******                              *******
-    //  ******                                ******
-    // ******                                  ******
-    // ******                                  ******
-    // ******                |                 ******    -START-
-    // ******                |                 ******       | 
-    // ******                | tire            ******       | R
-    //  ******               | radius         ******        | A
-    //  *******              |               *******        | Y
-    //   *******             |              *******         |  
-    //    ********           |            ********          | C
-    //      ********         |          ********            | A
-    //       ***********     |      ***********             | S
-    //          *************|**************                | T
-    //             **********|***********                   |
-    //                 ******|*******                     -END-
-    // GROUND ----------------------------------------------------------
-    // 
     tireRay(tire: Mesh, index: number): PhysicsRaycastResult {
-        let start = tire.getAbsolutePosition().add(this.carTransform(Vector3.Up().scale(this.tireRadius / 2)))
-        let end = tire.getAbsolutePosition().add(this.carTransform(Vector3.Down().scale(this.tireRadius / 2)))
+
+        let tirePosition = tire.getAbsolutePosition()
+        let rayPosition = new Vector3(tirePosition.x, tirePosition.y, tirePosition.z)
+
+        let start = rayPosition.add(this.carTransform(Vector3.Up().scale(this.rayStart)))
+        let end = rayPosition.add(this.carTransform(Vector3.Up().scale(this.rayEnd)))
         let ray = this.physicsEngine.raycast(start, end, { collideWith: 2 }) // TODO: Revisar porque el piso es 2
 
         let color = new Color4(1, 0.5, 0.5, 1)
@@ -220,7 +203,7 @@ export default class Car {
 		let velocity = tireUp.dot(tireVelocity)
 
 		// Calculate offset of the tire relative to the rest position of the suspension
-		let offset = tireRay.hitDistance - (this.suspensionRestDistance + this.tireRadius * 0.5)
+		let offset = tireRay.hitDistance - this.suspensionRestDistance
 
 		// Calculate the force to be applied
 		let force = - (offset * this.suspensionStrength) - (velocity * this.suspensionDamp)
@@ -240,7 +223,7 @@ export default class Car {
 		// Get the velocity proyected on to the tire "right" direction
 		let steeringVelocity = tireRight.dot(tireVelocity);
 
-        let normalizedSteeringVelocity = clamp01(steeringVelocity / this.gripFactorSpeed)
+        let normalizedSteeringVelocity = clamp01(tireVelocity.length() / this.gripFactorSpeed)
 
         // Low grip if going fast (drifting)
         // High grip if going slow
@@ -292,10 +275,10 @@ export default class Car {
             let desiredVelocityChange = -forwardVelocity;
 
             // TODO: The desired acceleration should be multiplied by a fixed delta time
-            let desiredAcceleration = desiredVelocityChange;
+            let desiredAcceleration = desiredVelocityChange * (this.backward ? this.brakingStrength : this.deaccelerationStrenght);
 
             // Apply steering force at tire position
-            this.carBody.applyForce(tireForward.scale(desiredAcceleration * this.brakingStrength), tire.getAbsolutePosition());
+            this.carBody.applyForce(tireForward.scale(desiredAcceleration), tire.getAbsolutePosition());
         }
 	}
 
