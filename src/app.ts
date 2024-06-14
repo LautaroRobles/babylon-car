@@ -2,7 +2,7 @@ import "@babylonjs/core/Debug/debugLayer";
 import "@babylonjs/inspector";
 import { Engine } from "@babylonjs/core";
 // Aca se puede cambiar la escena que se importa
-import { createScene } from "./scenes/scene2";
+import { createScene } from "./scenes/scene3";
 
 // Determina si en la escena se mostrara un menu de debug
 const debug = import.meta.env.DEV
