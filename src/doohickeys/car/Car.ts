@@ -144,11 +144,10 @@ export default class Car extends TransformNode {
         // Get the velocity opposite to the current tire velocity
 		let desiredVelocityChange = -steeringVelocity * gripFactor;
 
-        // TODO: Se deberia usar desiredAcceleration que deberia estar multiplicado por un static velocity
-		// let desiredAcceleration = desiredVelocityChange;
+		let desiredAcceleration = desiredVelocityChange / this.physicsEngine.getTimeStep();
 
         // Apply steering force at tire position
-		this.carBody.applyForce(tireRight.scale(desiredVelocityChange), tire.getAbsolutePosition());
+		this.carBody.applyForce(tireRight.scale(desiredAcceleration), tire.getAbsolutePosition());
 	}
 
     applyAccelerationForce(tire: Tire)
@@ -170,7 +169,7 @@ export default class Car extends TransformNode {
             // If im slow I accelerate faster
             // If im fast I accelerate slower
             // TODO: Change this to a lookuptable
-            let availableEngineStrength = EMath.clamp01(1.25 - carNormalizedSpeed) * this.acceleration.engineStrenght
+            let availableEngineStrength = EMath.clamp01((Math.sqrt(carNormalizedSpeed) + 0.5) * -(carNormalizedSpeed * carNormalizedSpeed - 1)) * this.acceleration.engineStrenght
 
             this.carBody.applyForce(tireForward.scale(availableEngineStrength), tire.getAbsolutePosition());
         }
@@ -185,11 +184,10 @@ export default class Car extends TransformNode {
             // Get the velocity opposite to the current tire velocity
             let desiredVelocityChange = -forwardVelocity * this.acceleration.brakingStrength;
 
-            // TODO: Se deberia usar desiredAcceleration que deberia estar multiplicado por un static velocity
-            // let desiredAcceleration = desiredVelocityChange;
+            let desiredAcceleration = desiredVelocityChange / this.physicsEngine.getTimeStep();
 
             // Apply steering force at tire position
-            this.carBody.applyForce(tireForward.scale(desiredVelocityChange), tire.getAbsolutePosition());
+            this.carBody.applyForce(tireForward.scale(desiredAcceleration), tire.getAbsolutePosition());
 
         }
         // Engine deacceleration
@@ -203,11 +201,10 @@ export default class Car extends TransformNode {
             // Get the velocity opposite to the current tire velocity
             let desiredVelocityChange = -forwardVelocity * this.acceleration.deaccelerationStrength;
 
-            // TODO: Se deberia usar desiredAcceleration que deberia estar multiplicado por un static velocity
-            // let desiredAcceleration = desiredVelocityChange;
+            let desiredAcceleration = desiredVelocityChange / this.physicsEngine.getTimeStep();
 
             // Apply steering force at tire position
-            this.carBody.applyForce(tireForward.scale(desiredVelocityChange), tire.getAbsolutePosition());
+            this.carBody.applyForce(tireForward.scale(desiredAcceleration), tire.getAbsolutePosition());
         }
 	}
 
@@ -225,11 +222,10 @@ export default class Car extends TransformNode {
             // Get the velocity opposite to the current tire velocity
             let desiredVelocityChange = -forwardVelocity * this.acceleration.deaccelerationStrength;
 
-            // TODO: Se deberia usar desiredAcceleration que deberia estar multiplicado por un static velocity
-            // let desiredAcceleration = desiredVelocityChange;
+            let desiredAcceleration = desiredVelocityChange / this.physicsEngine.getTimeStep();
 
             // Apply steering force at tire position
-            this.carBody.applyForce(tireForward.scale(desiredVelocityChange), tire.getAbsolutePosition());
+            this.carBody.applyForce(tireForward.scale(desiredAcceleration), tire.getAbsolutePosition());
         }
     }
 
@@ -239,7 +235,7 @@ export default class Car extends TransformNode {
 
         // Slowly go back to neutral rotation
         if(this.inputs.rotationAngleChange == 0 && this.currentRotationAngle != 0) {
-            this.currentRotationAngle -= (Math.abs(this.currentRotationAngle) / this.currentRotationAngle) * 0.5
+            this.currentRotationAngle -= (Math.abs(this.currentRotationAngle) / this.currentRotationAngle) * 2
         }
 
         // Apply input rotation
