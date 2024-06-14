@@ -10,4 +10,10 @@ export class EMath {
     static clamp01(value: float): float {
         return this.clamp(0, 1, value)
     }
+    static lerp(a: float, b: float, t: float): float{
+        return a + (b - a) * this.clamp01(t)
+    }
+    static unclampedLerp(a: float, b: float, t: float): float{
+        return a + (b - a) * t
+    }
 }

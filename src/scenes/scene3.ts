@@ -27,30 +27,30 @@ export async function createScene (engine: Engine): Promise<Scene> {
     const car = new Car("car1", scene, engine, physicsEngine, {
         dimensions: {
             width: 1.7,
-            height: 1.4,
+            height: 1.2,
             size: 4.6,
         },
         mass: 1354,
         acceleration: {
             topSpeedKmh: 200,
-            engineStrenght: 10000,
-            brakingStrength: 500,
+            engineStrenght: 20000,
+            brakingStrength: 1000,
             deaccelerationStrength: 50,
         },
         steering: {
-            maxRotationAngle: 35,
+            maxRotationAngle: 25,
         },
         suspension: {
-            rayLength: 1.4,
-            restDistance: 1.2,
-            springStrength: 20000,
-            springDamp: 2000,
+            rayLength: 2,
+            restDistance: 1.4,
+            springStrength: 30000,
+            springDamp: 3000,
         },
         tires: [
-            new Tire({ position: new Vector3(-0.9, -0.2,  2.3), canThrust: false, canRotate: true , gripFactor: 1000, mesh: tireMesh.clone("tire1") }),
-            new Tire({ position: new Vector3( 0.9, -0.2,  2.3), canThrust: false, canRotate: true , gripFactor: 1000, mesh: tireMesh.clone("tire2") }),
-            new Tire({ position: new Vector3(-0.9, -0.2, -2.3), canThrust: true , canRotate: false, gripFactor: 1000, mesh: tireMesh.clone("tire3") }),
-            new Tire({ position: new Vector3( 0.9, -0.2, -2.3), canThrust: true , canRotate: false, gripFactor: 1000, mesh: tireMesh.clone("tire4") }),
+            new Tire({ position: new Vector3(-1, -0.1,  1.8), canThrust: false, canRotate: 1, gripSpeed: 100, fastGrip: 1000 , slowGrip: 1000, mesh: tireMesh.clone("tire1") }),
+            new Tire({ position: new Vector3( 1, -0.1,  1.8), canThrust: false, canRotate: 1, gripSpeed: 100, fastGrip: 1000 , slowGrip: 1000, mesh: tireMesh.clone("tire2") }),
+            new Tire({ position: new Vector3(-1, -0.1, -1.8), canThrust: true , canRotate: 0, gripSpeed: 100, fastGrip: 500 , slowGrip: 1000, mesh: tireMesh.clone("tire3") }),
+            new Tire({ position: new Vector3( 1, -0.1, -1.8), canThrust: true , canRotate: 0, gripSpeed: 100, fastGrip: 500 , slowGrip: 1000, mesh: tireMesh.clone("tire4") }),
         ]
     })
     car.carBody.disablePreStep = true
@@ -66,7 +66,7 @@ export async function createScene (engine: Engine): Promise<Scene> {
         width: 1000, 
         height: 1000,
         minHeight: 0,
-        maxHeight: 30,
+        maxHeight: 100,
         subdivisions: 64,
         onReady: (groundMesh) => {
             // Cuando se termina de generar la mesh creamos el PhysicsBody y PhisicsShape

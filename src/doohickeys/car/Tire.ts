@@ -1,22 +1,36 @@
 import { Mesh, TransformNode, Vector3 } from "@babylonjs/core";
 
 export default class Tire extends TransformNode {
-    options
+    canThrust
+    canRotate
+    gripSpeedKmh
+    fastGrip
+    slowGrip
+    mesh
 
     constructor(options: {
         canThrust: boolean,
-        canRotate: boolean,
-        gripFactor: number,
+        canRotate: number,
+        gripSpeed: number,
+        fastGrip: number,
+        slowGrip: number,
         position: Vector3,
         mesh: Mesh,
     }) {
         super("tire");
 
+        this.canThrust = options.canThrust
+        this.canRotate = options.canRotate
+
+        this.gripSpeedKmh = options.gripSpeed
+        this.fastGrip = options.fastGrip
+        this.slowGrip = options.slowGrip
+        
         this.position = options.position
-        this.addChild(options.mesh)
+        this.mesh = options.mesh
 
-        options.mesh.position = Vector3.Zero()
+        this.addChild(this.mesh)
 
-        this.options = options
+        this.mesh.position = Vector3.Zero()
     }
 }

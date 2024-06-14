@@ -1,7 +1,7 @@
 import { Color3, Engine, FollowCamera, FreeCamera, HavokPlugin, HemisphericLight, MeshBuilder, PhysicsAggregate, PhysicsImpostor, PhysicsShapeType, Scene, StandardMaterial, Vector3 } from "@babylonjs/core";
 import { GridMaterial } from '@babylonjs/materials';
 import HavokPhysics from "@babylonjs/havok";
-import Car from "../doohickeys/car";
+import Car from "../doohickeys/carDeprecated";
 
 // No es necesario crear las escenas de esta manera pero lo hago asi porque es lo mas facil
 export async function createScene (engine: Engine): Promise<Scene> {
