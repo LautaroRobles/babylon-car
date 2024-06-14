@@ -33,7 +33,7 @@ export async function createScene (engine: Engine): Promise<Scene> {
         mass: 1354,
         acceleration: {
             topSpeedKmh: 200,
-            engineStrenght: 20000,
+            engineStrenght: 25000,
             brakingStrength: 1000,
             deaccelerationStrength: 50,
         },
@@ -41,16 +41,16 @@ export async function createScene (engine: Engine): Promise<Scene> {
             maxRotationAngle: 25,
         },
         suspension: {
-            rayLength: 2,
-            restDistance: 1.4,
+            rayLength: 1.2,
+            restDistance: 0.9,
             springStrength: 30000,
             springDamp: 3000,
         },
         tires: [
-            new Tire({ position: new Vector3(-1, -0.1,  1.8), canThrust: false, canRotate: 1, gripSpeed: 100, fastGrip: 1000 , slowGrip: 1000, mesh: tireMesh.clone("tire1") }),
-            new Tire({ position: new Vector3( 1, -0.1,  1.8), canThrust: false, canRotate: 1, gripSpeed: 100, fastGrip: 1000 , slowGrip: 1000, mesh: tireMesh.clone("tire2") }),
-            new Tire({ position: new Vector3(-1, -0.1, -1.8), canThrust: true , canRotate: 0, gripSpeed: 100, fastGrip: 500 , slowGrip: 1000, mesh: tireMesh.clone("tire3") }),
-            new Tire({ position: new Vector3( 1, -0.1, -1.8), canThrust: true , canRotate: 0, gripSpeed: 100, fastGrip: 500 , slowGrip: 1000, mesh: tireMesh.clone("tire4") }),
+            new Tire({ position: new Vector3(-1, -0.3,  1.8), canThrust: false, canRotate: 1, gripSpeed: 100, fastGrip: 1000 , slowGrip: 1000, mesh: tireMesh.clone("tire1") }),
+            new Tire({ position: new Vector3( 1, -0.3,  1.8), canThrust: false, canRotate: 1, gripSpeed: 100, fastGrip: 1000 , slowGrip: 1000, mesh: tireMesh.clone("tire2") }),
+            new Tire({ position: new Vector3(-1, -0.3, -1.8), canThrust: true , canRotate: 0, gripSpeed: 100, fastGrip: 500 , slowGrip: 1000, mesh: tireMesh.clone("tire3") }),
+            new Tire({ position: new Vector3( 1, -0.3, -1.8), canThrust: true , canRotate: 0, gripSpeed: 100, fastGrip: 500 , slowGrip: 1000, mesh: tireMesh.clone("tire4") }),
         ]
     })
     car.carBody.disablePreStep = true

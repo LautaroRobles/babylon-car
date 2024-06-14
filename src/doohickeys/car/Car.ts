@@ -66,7 +66,7 @@ export default class Car extends TransformNode {
         this.steering = options.steering
         this.suspension = options.suspension
 
-        this.carMesh = MeshBuilder.CreateBox("carMesh", { width: this.dimensions.width, height: this.dimensions.height, size: this.dimensions.size })
+        this.carMesh = MeshBuilder.CreateCapsule("carMesh", { height: this.dimensions.size, radius: this.dimensions.width / 2, orientation: Vector3.Forward() })
         
         this.carShape = new PhysicsShape({
             parameters: {
