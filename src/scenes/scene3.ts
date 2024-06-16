@@ -31,8 +31,8 @@ function generarOptions() {
             springDamp: 4000,
         },
         tires: [
-            new Tire({ position: new Vector3(-1, -0.4,  1.8), canThrust: false, canRotate: 1 , gripSpeed: 60, fastGrip: 12, slowGrip: 15, mesh: tireMesh.clone("tire1") }),
-            new Tire({ position: new Vector3( 1, -0.4,  1.8), canThrust: false, canRotate: 1 , gripSpeed: 60, fastGrip: 12, slowGrip: 15, mesh: tireMesh.clone("tire2") }),
+            new Tire({ position: new Vector3(-1, -0.4,  1.8), canThrust: false, canRotate: 1 , gripSpeed: 60, fastGrip: 5 , slowGrip: 15, mesh: tireMesh.clone("tire1") }),
+            new Tire({ position: new Vector3( 1, -0.4,  1.8), canThrust: false, canRotate: 1 , gripSpeed: 60, fastGrip: 5 , slowGrip: 15, mesh: tireMesh.clone("tire2") }),
             new Tire({ position: new Vector3(-1, -0.4, -1.8), canThrust: true , canRotate: 0 , gripSpeed: 60, fastGrip: 50, slowGrip: 15, mesh: tireMesh.clone("tire3") }),
             new Tire({ position: new Vector3( 1, -0.4, -1.8), canThrust: true , canRotate: 0 , gripSpeed: 60, fastGrip: 50, slowGrip: 15, mesh: tireMesh.clone("tire4") }),
         ]
